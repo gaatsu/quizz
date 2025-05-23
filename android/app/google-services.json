@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "486337463820",
+    "project_id": "quizz-5df8c",
+    "storage_bucket": "quizz-5df8c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:486337463820:android:9bf9c2111ff305e2e21029",
+        "android_client_info": {
+          "package_name": "com.bpk.quizzaula"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBla1rLUQ_Ey1veod31KPpsWv69VjUPWlc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
