@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watch_face_name">Viper HUD</string>
+
+    <!-- Cockpit placards stay in English: that is what is painted on the
+         real glass, and the abbreviations have to fit the boxes. -->
+    <string name="label_step">STEP</string>
+    <string name="label_batt">BATT</string>
+    <string name="ladder_10">10</string>
+    <string name="ladder_20">20</string>
+    <string name="warn_pull_up">PULL UP</string>
+</resources>

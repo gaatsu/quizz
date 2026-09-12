@@ -1,169 +1,88 @@
-# 🧠 Quiz Master - Aplicativo de Quiz em Flutter
+# Viper HUD
 
-Um aplicativo de quiz moderno e interativo desenvolvido em Flutter com banco de dados SQLite local para perguntas e Firebase Realtime Database para ranking online.
+Um watch face para **Wear OS** no estilo do HUD de um caça dos anos 80–90.
+Fósforo verde sobre preto absoluto, marcador de trajetória no centro, escada de
+arfagem que inclina com o punho e fita de minutos no topo.
 
-## ✨ Funcionalidades
+Abaixo de **15% de bateria** a escada de arfagem se apaga e entra o aviso de
+colisão com o solo: chevrons de subida e a caixa **PULL UP** piscando em âmbar —
+do mesmo jeito que um GCAS limpa o HUD no avião de verdade.
 
-- 🎯 **Quiz de múltipla escolha** com diferentes categorias
-- 🗄️ **SQLite** para armazenamento local das perguntas
-- 🔥 **Firebase Realtime Database** para ranking online
-- 🏆 **Sistema de ranking** com leaderboard
-- ⏱️ **Cronômetro** e sistema de pontuação
-- 🎨 **Interface moderna** com animações
-- 📱 **Design responsivo** e Material Design 3
+![Viper HUD](watchface/src/main/res/drawable/preview.png)
 
-## 🚀 Como Executar
+## Como é feito
 
-### Pré-requisitos
+Escrito em **Watch Face Format v1** (WFF) — XML declarativo, sem uma linha de
+Kotlin. É o formato que o Google exige para watch faces novas na Play Store, e
+o sistema renderiza tudo nativamente, sem um processo do app rodando. O arquivo
+inteiro é [`watchface/src/main/res/raw/watchface.xml`](watchface/src/main/res/raw/watchface.xml).
 
-- Flutter SDK (versão 3.5.0 ou superior)
-- Dart SDK
-- Android Studio ou VS Code
-- Conta no Firebase (para funcionalidade online)
+| | |
+|---|---|
+| Formato | Watch Face Format v1 |
+| Compatibilidade | Wear OS 4 e acima (`minSdk 33`) |
+| Tela virtual | 450 × 450, recortada em círculo |
+| Tipografia | [B612 Mono](https://github.com/polarsys/b612) — a fonte que a Airbus encomendou para displays de cockpit (OFL, embarcada no APK) |
 
-### Passos para Configuração
+### O que está na tela
 
-1. **Clone ou baixe o projeto**
+| Elemento | Fonte de dado |
+|---|---|
+| Hora | `[HOUR_0_23_Z]` ou `[HOUR_1_12_Z]` conforme `[IS_24_HOUR_MODE]`, com `[MINUTE_Z]` |
+| Segundos | `[SECOND_Z]`, pequenos e elevados como um readout de altitude |
+| Data | `[DAY_OF_WEEK_S]` `[DAY_Z]` `[MONTH_S]`, em caixa alta |
+| Fita de minutos | `[MINUTE]` — cinco marcas de um minuto, a atual sob o índice |
+| Caixa STEP | `[STEP_COUNT]`, ou `--` se a permissão não estiver concedida |
+| Caixa BATT | `[BATTERY_PERCENT]` |
+| Escada de arfagem | `[ACCELEROMETER_ANGLE_Y]` e `[ACCELEROMETER_ANGLE_X]` via `Gyro` |
+| Aviso PULL UP | `[BATTERY_PERCENT] <= 15`, piscando com `[SECOND] % 2` |
+
+### Modo ambiente
+
+Fica só o marcador de trajetória, a hora e a data, em verde apagado — sem fita,
+sem escada, sem caixas, sem segundos. O PULL UP continua aparecendo, mas **parado**:
+em ambiente a tela só redesenha uma vez por minuto, então um pisca de 1 Hz
+congelaria em um estado qualquer.
+
+## Rodando
+
+Precisa do Android Studio com o SDK 35 e um relógio (ou emulador) com Wear OS 4+.
+
 ```bash
-cd quiz_app
+./gradlew :watchface:installDebug
 ```
 
-2. **Instale as dependências**
+Depois é só escolher o watch face na lista do relógio. Para testar o PULL UP sem
+esperar a bateria acabar, num emulador:
+
 ```bash
-flutter pub get
+adb shell dumpsys battery set level 10
+adb shell dumpsys battery reset   # volta ao normal
 ```
 
-3. **Configure o Firebase** (Opcional - para funcionalidade online)
-   - Crie um projeto no [Firebase Console](https://console.firebase.google.com/)
-   - Ative o Realtime Database
-   - Execute o FlutterFire CLI:
-   ```bash
-   firebase login
-   flutterfire configure
-   ```
-   - Ou substitua as configurações em `lib/firebase_options.dart` com suas chaves
+A permissão de contagem de passos (`ACTIVITY_RECOGNITION`) é pedida na
+instalação. Sem ela a caixa STEP mostra `--` e o resto funciona igual.
 
-4. **Execute o aplicativo**
-```bash
-flutter run
-```
+## Publicando
 
-## 📂 Estrutura do Projeto
+O `build.gradle.kts` do módulo ainda aponta para a chave de debug. Antes de subir
+para a Play Store, troque por uma chave própria e mantenha
+`isShrinkResources = false`: o XML do formato referencia as fontes e o preview
+pelo nome, e o shrinker não enxerga esse uso.
 
-```
-lib/
-├── main.dart                 # Ponto de entrada da aplicação
-├── firebase_options.dart     # Configurações do Firebase
-├── models/                   # Modelos de dados
-│   ├── question.dart         # Modelo da pergunta
-│   └── quiz_result.dart      # Modelo do resultado
-├── services/                 # Serviços e lógica de negócio
-│   ├── database_service.dart # Serviço SQLite
-│   └── firebase_service.dart # Serviço Firebase
-└── screens/                  # Telas da aplicação
-    ├── home_screen.dart      # Tela inicial
-    ├── quiz_screen.dart      # Tela do quiz
-    ├── result_screen.dart    # Tela de resultados
-    └── leaderboard_screen.dart # Tela de ranking
-```
+## Estado
 
-## 🎮 Como Usar
+O XML foi validado contra o schema oficial do Watch Face Format v1
+(os XSDs de [`google/watchface`](https://github.com/google/watchface)) — zero erros
+de elemento, atributo, enum ou aninhamento. O que nenhuma validação estática pega
+é o comportamento em hardware: a inclinação da escada depende de como o
+acelerômetro está orientado no relógio. Se ela girar no eixo errado ou invertida,
+troque `ACCELEROMETER_ANGLE_Y` por `ACCELEROMETER_ANGLE_X` no elemento `Gyro` —
+há um comentário no XML marcando o lugar.
 
-1. **Tela Inicial**: Digite seu nome e escolha uma categoria
-2. **Quiz**: Responda as perguntas tocando nas opções
-3. **Resultados**: Veja sua pontuação e tempo
-4. **Ranking**: Compare seus resultados com outros jogadores
+### Ideias para depois
 
-## 🗃️ Banco de Dados
-
-### SQLite (Local)
-- Armazena perguntas por categoria
-- Perguntas incluem: texto, opções, resposta correta, categoria e dificuldade
-- Dados iniciais pré-populados com perguntas de:
-  - Geografia 🌍
-  - História 📚
-  - Ciências 🔬
-  - Esportes ⚽
-
-### Firebase Realtime Database (Online)
-- Armazena resultados dos quizzes
-- Ranking global e por categoria
-- Estatísticas dos jogadores
-- Sincronização em tempo real
-
-## 🎨 Design
-
-- **Cores**: Gradiente azul-roxo moderno
-- **Tipografia**: Google Fonts (Poppins)
-- **Animações**: Transições suaves entre telas
-- **Ícones**: Material Design Icons com emojis
-- **Layout**: Cards com bordas arredondadas e sombras
-
-## 📱 Funcionalidades Offline
-
-O aplicativo funciona completamente offline para:
-- Visualizar e responder perguntas
-- Calcular pontuação
-- Navegar entre telas
-
-A funcionalidade online (ranking) requer conexão com a internet.
-
-## 🛠️ Tecnologias Utilizadas
-
-- **Flutter** - Framework principal
-- **SQLite** (sqflite) - Banco local
-- **Firebase** - Backend online
-- **Google Fonts** - Tipografia
-- **UUID** - Geração de IDs únicos
-- **Animações** - Flutter Animations
-
-## 🔧 Configuração Avançada
-
-### Adicionando Novas Perguntas
-
-Edite o arquivo `lib/services/database_service.dart` na função `_insertSampleQuestions()`:
-
-```dart
-Question(
-  text: "Sua pergunta aqui?",
-  options: ["Opção A", "Opção B", "Opção C", "Opção D"],
-  correctAnswerIndex: 0, // Índice da resposta correta (0-3)
-  category: "Sua Categoria",
-  difficulty: 1, // 1=Fácil, 2=Médio, 3=Difícil
-),
-```
-
-### Personalizando Cores
-
-Edite o `main.dart` para alterar as cores do tema:
-
-```dart
-colorScheme: ColorScheme.fromSeed(
-  seedColor: const Color(0xFF667eea), // Cor principal
-  brightness: Brightness.light,
-),
-```
-
-## 📄 Licença
-
-Este projeto é desenvolvido para fins educacionais e de demonstração.
-
-## 🤝 Contribuição
-
-Contribuições são bem-vindas! Sinta-se à vontade para:
-- Reportar bugs
-- Sugerir novas funcionalidades
-- Enviar pull requests
-- Adicionar novas perguntas
-
-## 📞 Suporte
-
-Se você encontrar algum problema ou tiver dúvidas:
-1. Verifique se todas as dependências estão instaladas
-2. Execute `flutter doctor` para diagnosticar problemas
-3. Verifique se o Firebase está configurado corretamente
-4. Consulte a documentação do Flutter
-
----
-
-Desenvolvido com ❤️ usando Flutter
+- **Complications** nas caixas STEP e BATT, para escolher o que aparece ali.
+- **Cores configuráveis** — âmbar e azul gelo além do verde, via `ColorConfiguration`.
+- **WFF v2** liberaria `letterSpacing`, que deixaria os rótulos mais próximos de
+  um placard de cockpit (custo: sobe o mínimo para Wear OS 5).

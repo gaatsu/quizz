@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    VIPER HUD — Watch Face Format (WFF v1, Wear OS 4+)
+
+    An F-16 style heads-up display. Phosphor green on pure black, with a
+    flight path marker, a pitch ladder that tilts with the wrist, and a
+    minute tape across the top.
+
+    Ground collision warning: below 15% battery the ladder declutters and
+    a blinking amber PULL UP cue takes over, the same way a GCAS warning
+    clears the HUD in the real aircraft.
+
+    Virtual canvas is 450x450. All coordinates below are in that space.
+
+    Colour reference
+      #FF4DFF8F  phosphor green       #FF1E7A45  phosphor, ambient
+      #4D4DFF8F  phosphor glow        #FFFFB03A  caution amber
+      #4DFFB03A  amber glow           #FF7A5418  caution amber, ambient
+-->
+<WatchFace width="450" height="450" clipShape="CIRCLE">
+
+  <Metadata key="CLOCK_TYPE" value="DIGITAL"/>
+  <Metadata key="PREVIEW_TIME" value="10:08:32"/>
+
+  <Scene backgroundColor="#FF000000">
+
+    <!-- ================================================================
+         Interactive-only symbology: FOV brackets, minute tape, data boxes.
+         One group so a single Variant switches all of it off in ambient.
+         ================================================================ -->
+    <Group name="symbology" x="0" y="0" width="450" height="450" alpha="255">
+      <Variant mode="AMBIENT" target="alpha" value="0"/>
+
+      <!-- Field-of-view brackets -->
+      <PartDraw x="0" y="0" width="450" height="450" alpha="140">
+        <Line startX="74" startY="104" endX="74" endY="74">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+        <Line startX="74" startY="74" endX="104" endY="74">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+        <Line startX="346" startY="74" endX="376" endY="74">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+        <Line startX="376" startY="74" endX="376" endY="104">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+        <Line startX="74" startY="346" endX="74" endY="376">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+        <Line startX="74" startY="376" endX="104" endY="376">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+        <Line startX="346" startY="376" endX="376" endY="376">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+        <Line startX="376" startY="376" endX="376" endY="346">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+      </PartDraw>
+
+      <!-- Minute tape. The index bar sits above the current minute; the
+           five labels step one minute apart and advance every minute. -->
+      <PartDraw x="0" y="0" width="450" height="450">
+        <!-- index bar -->
+        <Rectangle x="222" y="44" width="5" height="18">
+          <Fill color="#FF4DFF8F"/>
+        </Rectangle>
+        <!-- tape baseline -->
+        <Line startX="92" startY="72" endX="358" endY="72">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+        <!-- major ticks -->
+        <Line startX="101" startY="72" endX="101" endY="84">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+        <Line startX="163" startY="72" endX="163" endY="84">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+        <Line startX="225" startY="72" endX="225" endY="84">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+        <Line startX="287" startY="72" endX="287" endY="84">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+        <Line startX="349" startY="72" endX="349" endY="84">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+        <!-- minor ticks -->
+        <Line startX="132" startY="72" endX="132" endY="79">
+          <Stroke color="#FF4DFF8F" thickness="1.5"/>
+        </Line>
+        <Line startX="194" startY="72" endX="194" endY="79">
+          <Stroke color="#FF4DFF8F" thickness="1.5"/>
+        </Line>
+        <Line startX="256" startY="72" endX="256" endY="79">
+          <Stroke color="#FF4DFF8F" thickness="1.5"/>
+        </Line>
+        <Line startX="318" startY="72" endX="318" endY="79">
+          <Stroke color="#FF4DFF8F" thickness="1.5"/>
+        </Line>
+      </PartDraw>
+
+      <PartText x="70" y="88" width="62" height="26" alpha="160">
+        <Text align="CENTER">
+          <Font family="b612_mono" size="17" color="#FF4DFF8F">
+            <Template>%02d<Parameter expression="([MINUTE] + 58) % 60"/></Template>
+          </Font>
+        </Text>
+      </PartText>
+      <PartText x="132" y="88" width="62" height="26" alpha="200">
+        <Text align="CENTER">
+          <Font family="b612_mono" size="17" color="#FF4DFF8F">
+            <Template>%02d<Parameter expression="([MINUTE] + 59) % 60"/></Template>
+          </Font>
+        </Text>
+      </PartText>
+      <PartText x="194" y="88" width="62" height="26">
+        <Text align="CENTER">
+          <Font family="b612_mono_bold" size="17" color="#FF4DFF8F">
+            <OutGlow radius="4" color="#4D4DFF8F">
+              <Template>%02d<Parameter expression="[MINUTE]"/></Template>
+            </OutGlow>
+          </Font>
+        </Text>
+      </PartText>
+      <PartText x="256" y="88" width="62" height="26" alpha="200">
+        <Text align="CENTER">
+          <Font family="b612_mono" size="17" color="#FF4DFF8F">
+            <Template>%02d<Parameter expression="([MINUTE] + 1) % 60"/></Template>
+          </Font>
+        </Text>
+      </PartText>
+      <PartText x="318" y="88" width="62" height="26" alpha="160">
+        <Text align="CENTER">
+          <Font family="b612_mono" size="17" color="#FF4DFF8F">
+            <Template>%02d<Parameter expression="([MINUTE] + 2) % 60"/></Template>
+          </Font>
+        </Text>
+      </PartText>
+
+      <!-- Data boxes: steps on the left, battery on the right -->
+      <PartDraw x="0" y="0" width="450" height="450">
+        <Rectangle x="28" y="204" width="98" height="42">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Rectangle>
+        <Rectangle x="324" y="204" width="98" height="42">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Rectangle>
+      </PartDraw>
+
+      <PartText x="28" y="176" width="98" height="24" alpha="190">
+        <Text align="START">
+          <Font family="b612_mono" size="13" color="#FF4DFF8F">
+            <Template>%s<Parameter expression="label_step"/></Template>
+          </Font>
+        </Text>
+      </PartText>
+      <PartText x="324" y="176" width="98" height="24" alpha="190">
+        <Text align="END">
+          <Font family="b612_mono" size="13" color="#FF4DFF8F">
+            <Template>%s<Parameter expression="label_batt"/></Template>
+          </Font>
+        </Text>
+      </PartText>
+
+      <PartText x="34" y="209" width="86" height="32">
+        <Text align="END" ellipsis="TRUE">
+          <Font family="b612_mono" size="25" color="#FF4DFF8F">
+            <Template>%s<Parameter expression="[STEP_COUNT] != null ? [STEP_COUNT] : &quot;--&quot;"/></Template>
+          </Font>
+        </Text>
+      </PartText>
+      <PartText x="330" y="209" width="86" height="32">
+        <Text align="START" ellipsis="TRUE">
+          <Font family="b612_mono" size="25" color="#FF4DFF8F">
+            <Template>%d%%<Parameter expression="[BATTERY_PERCENT]"/></Template>
+          </Font>
+        </Text>
+      </PartText>
+    </Group>
+
+    <!-- ================================================================
+         Pitch ladder, or the ground collision warning when the battery
+         is down to 15%. Only one of the two is ever on screen.
+         ================================================================ -->
+    <Condition>
+      <Expressions>
+        <Expression name="batteryLow">15 &gt;= [BATTERY_PERCENT]</Expression>
+      </Expressions>
+
+      <Compare expression="batteryLow">
+
+        <!-- Pull-up chevrons, steady -->
+        <Group name="gcas_chevrons" x="0" y="0" width="450" height="450" alpha="255">
+          <Variant mode="AMBIENT" target="alpha" value="90"/>
+          <PartDraw x="0" y="0" width="450" height="450">
+            <Line startX="191" startY="142" endX="225" endY="124">
+              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
+            </Line>
+            <Line startX="225" startY="124" endX="259" endY="142">
+              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
+            </Line>
+            <Line startX="191" startY="168" endX="225" endY="150">
+              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
+            </Line>
+            <Line startX="225" startY="150" endX="259" endY="168">
+              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
+            </Line>
+            <Line startX="191" startY="194" endX="225" endY="176">
+              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
+            </Line>
+            <Line startX="225" startY="176" endX="259" endY="194">
+              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
+            </Line>
+          </PartDraw>
+        </Group>
+
+        <!-- Blinking PULL UP, one second on, one second off.
+             Interactive only: ambient redraws once a minute, so the
+             steady copy below takes over there. -->
+        <Condition>
+          <Expressions>
+            <Expression name="blinkOn">([SECOND] % 2) == 0</Expression>
+          </Expressions>
+          <Compare expression="blinkOn">
+            <Group name="pull_up_blink" x="0" y="0" width="450" height="450" alpha="255">
+              <Variant mode="AMBIENT" target="alpha" value="0"/>
+              <PartDraw x="0" y="0" width="450" height="450">
+                <Rectangle x="140" y="252" width="170" height="42">
+                  <Stroke color="#FFFFB03A" thickness="2.5"/>
+                </Rectangle>
+              </PartDraw>
+              <PartText x="140" y="252" width="170" height="42">
+                <Text align="CENTER">
+                  <Font family="b612_mono_bold" size="27" color="#FFFFB03A">
+                    <OutGlow radius="7" color="#4DFFB03A">
+                      <Template>%s<Parameter expression="warn_pull_up"/></Template>
+                    </OutGlow>
+                  </Font>
+                </Text>
+              </PartText>
+            </Group>
+          </Compare>
+        </Condition>
+
+        <!-- Steady PULL UP for ambient -->
+        <Group name="pull_up_ambient" x="0" y="0" width="450" height="450" alpha="0">
+          <Variant mode="AMBIENT" target="alpha" value="255"/>
+          <PartDraw x="0" y="0" width="450" height="450">
+            <Rectangle x="140" y="252" width="170" height="42">
+              <Stroke color="#FF7A5418" thickness="2"/>
+            </Rectangle>
+          </PartDraw>
+          <PartText x="140" y="252" width="170" height="42">
+            <Text align="CENTER">
+              <Font family="b612_mono" size="27" color="#FF7A5418">
+                <Template>%s<Parameter expression="warn_pull_up"/></Template>
+              </Font>
+            </Text>
+          </PartText>
+        </Group>
+
+      </Compare>
+
+      <Default>
+        <!-- Pitch ladder and horizon. Gyro tilts the whole thing with the
+             wrist, clamped so it stays inside the glass.
+             If the tilt feels inverted or lands on the wrong axis for your
+             watch, swap ACCELEROMETER_ANGLE_Y and ACCELEROMETER_ANGLE_X. -->
+        <Group name="pitch_ladder" x="0" y="0" width="450" height="450"
+               pivotX="0.5" pivotY="0.5" alpha="255">
+          <Variant mode="AMBIENT" target="alpha" value="0"/>
+          <Gyro angle="-clamp([ACCELEROMETER_ANGLE_Y], -28, 28)"
+                y="clamp([ACCELEROMETER_ANGLE_X], -14, 14) * 1.6"/>
+
+          <PartDraw x="0" y="0" width="450" height="450">
+            <!-- horizon, broken either side of the flight path marker -->
+            <Line startX="134" startY="225" endX="196" endY="225">
+              <Stroke color="#FF4DFF8F" thickness="2.5"/>
+            </Line>
+            <Line startX="254" startY="225" endX="316" endY="225">
+              <Stroke color="#FF4DFF8F" thickness="2.5"/>
+            </Line>
+
+            <!-- +20 -->
+            <Line startX="152" startY="147" endX="206" endY="147">
+              <Stroke color="#FF4DFF8F" thickness="2"/>
+            </Line>
+            <Line startX="244" startY="147" endX="298" endY="147">
+              <Stroke color="#FF4DFF8F" thickness="2"/>
+            </Line>
+            <Line startX="152" startY="147" endX="152" endY="156">
+              <Stroke color="#FF4DFF8F" thickness="2"/>
+            </Line>
+            <Line startX="298" startY="147" endX="298" endY="156">
+              <Stroke color="#FF4DFF8F" thickness="2"/>
+            </Line>
+
+            <!-- +10 -->
+            <Line startX="152" startY="183" endX="206" endY="183">
+              <Stroke color="#FF4DFF8F" thickness="2"/>
+            </Line>
+            <Line startX="244" startY="183" endX="298" endY="183">
+              <Stroke color="#FF4DFF8F" thickness="2"/>
+            </Line>
+            <Line startX="152" startY="183" endX="152" endY="192">
+              <Stroke color="#FF4DFF8F" thickness="2"/>
+            </Line>
+            <Line startX="298" startY="183" endX="298" endY="192">
+              <Stroke color="#FF4DFF8F" thickness="2"/>
+            </Line>
+
+            <!-- -10, dashed below the horizon -->
+            <Line startX="152" startY="267" endX="206" endY="267">
+              <Stroke color="#FF4DFF8F" thickness="2" dashIntervals="9 7"/>
+            </Line>
+            <Line startX="244" startY="267" endX="298" endY="267">
+              <Stroke color="#FF4DFF8F" thickness="2" dashIntervals="9 7"/>
+            </Line>
+            <Line startX="152" startY="267" endX="152" endY="258">
+              <Stroke color="#FF4DFF8F" thickness="2"/>
+            </Line>
+            <Line startX="298" startY="267" endX="298" endY="258">
+              <Stroke color="#FF4DFF8F" thickness="2"/>
+            </Line>
+
+            <!-- -20, dashed below the horizon -->
+            <Line startX="152" startY="303" endX="206" endY="303">
+              <Stroke color="#FF4DFF8F" thickness="2" dashIntervals="9 7"/>
+            </Line>
+            <Line startX="244" startY="303" endX="298" endY="303">
+              <Stroke color="#FF4DFF8F" thickness="2" dashIntervals="9 7"/>
+            </Line>
+            <Line startX="152" startY="303" endX="152" endY="294">
+              <Stroke color="#FF4DFF8F" thickness="2"/>
+            </Line>
+            <Line startX="298" startY="303" endX="298" endY="294">
+              <Stroke color="#FF4DFF8F" thickness="2"/>
+            </Line>
+          </PartDraw>
+
+          <!-- Rung labels, above the horizon only: the readouts below
+               need the room. -->
+          <PartText x="90" y="134" width="52" height="26" alpha="200">
+            <Text align="END">
+              <Font family="b612_mono" size="15" color="#FF4DFF8F">
+                <Template>%s<Parameter expression="ladder_20"/></Template>
+              </Font>
+            </Text>
+          </PartText>
+          <PartText x="308" y="134" width="52" height="26" alpha="200">
+            <Text align="START">
+              <Font family="b612_mono" size="15" color="#FF4DFF8F">
+                <Template>%s<Parameter expression="ladder_20"/></Template>
+              </Font>
+            </Text>
+          </PartText>
+          <PartText x="90" y="170" width="52" height="26" alpha="200">
+            <Text align="END">
+              <Font family="b612_mono" size="15" color="#FF4DFF8F">
+                <Template>%s<Parameter expression="ladder_10"/></Template>
+              </Font>
+            </Text>
+          </PartText>
+          <PartText x="308" y="170" width="52" height="26" alpha="200">
+            <Text align="START">
+              <Font family="b612_mono" size="15" color="#FF4DFF8F">
+                <Template>%s<Parameter expression="ladder_10"/></Template>
+              </Font>
+            </Text>
+          </PartText>
+        </Group>
+      </Default>
+    </Condition>
+
+    <!-- ================================================================
+         Flight path marker. Fixed to the airframe, so no Gyro here.
+         Stays on in ambient, dimmed.
+         ================================================================ -->
+    <Group name="marker" x="0" y="0" width="450" height="450" alpha="255">
+      <Variant mode="AMBIENT" target="alpha" value="0"/>
+      <PartDraw x="0" y="0" width="450" height="450">
+        <Ellipse x="214" y="214" width="22" height="22">
+          <Stroke color="#FF4DFF8F" thickness="2.5"/>
+        </Ellipse>
+        <Line startX="236" startY="225" endX="260" endY="225">
+          <Stroke color="#FF4DFF8F" thickness="2.5"/>
+        </Line>
+        <Line startX="190" startY="225" endX="214" endY="225">
+          <Stroke color="#FF4DFF8F" thickness="2.5"/>
+        </Line>
+        <Line startX="225" startY="214" endX="225" endY="202">
+          <Stroke color="#FF4DFF8F" thickness="2.5"/>
+        </Line>
+      </PartDraw>
+    </Group>
+
+    <Group name="marker_ambient" x="0" y="0" width="450" height="450" alpha="0">
+      <Variant mode="AMBIENT" target="alpha" value="255"/>
+      <PartDraw x="0" y="0" width="450" height="450">
+        <Ellipse x="214" y="214" width="22" height="22">
+          <Stroke color="#FF1E7A45" thickness="2"/>
+        </Ellipse>
+        <Line startX="236" startY="225" endX="260" endY="225">
+          <Stroke color="#FF1E7A45" thickness="2"/>
+        </Line>
+        <Line startX="190" startY="225" endX="214" endY="225">
+          <Stroke color="#FF1E7A45" thickness="2"/>
+        </Line>
+        <Line startX="225" startY="214" endX="225" endY="202">
+          <Stroke color="#FF1E7A45" thickness="2"/>
+        </Line>
+      </PartDraw>
+    </Group>
+
+    <!-- ================================================================
+         Primary readout
+         ================================================================ -->
+
+    <!-- Interactive: bold, glowing -->
+    <PartText x="0" y="296" width="404" height="80" alpha="255">
+      <Variant mode="AMBIENT" target="alpha" value="0"/>
+      <Text align="CENTER">
+        <Font family="b612_mono_bold" size="63" color="#FF4DFF8F">
+          <OutGlow radius="8" color="#4D4DFF8F">
+            <Template>%s:%s<Parameter
+              expression="[IS_24_HOUR_MODE] ? [HOUR_0_23_Z] : [HOUR_1_12_Z]"/><Parameter
+              expression="[MINUTE_Z]"/></Template>
+          </OutGlow>
+        </Font>
+      </Text>
+    </PartText>
+
+    <!-- Ambient: lighter weight, no glow, dim phosphor -->
+    <PartText x="0" y="296" width="404" height="80" alpha="0">
+      <Variant mode="AMBIENT" target="alpha" value="255"/>
+      <Text align="CENTER">
+        <Font family="b612_mono" size="63" color="#FF1E7A45">
+          <Template>%s:%s<Parameter
+            expression="[IS_24_HOUR_MODE] ? [HOUR_0_23_Z] : [HOUR_1_12_Z]"/><Parameter
+            expression="[MINUTE_Z]"/></Template>
+        </Font>
+      </Text>
+    </PartText>
+
+    <!-- Seconds, set small and high like a HUD altitude readout -->
+    <PartText x="315" y="298" width="64" height="30" alpha="255">
+      <Variant mode="AMBIENT" target="alpha" value="0"/>
+      <Text align="START">
+        <Font family="b612_mono" size="23" color="#FF4DFF8F">
+          <Template>%s<Parameter expression="[SECOND_Z]"/></Template>
+        </Font>
+      </Text>
+    </PartText>
+
+    <!-- Date -->
+    <PartText x="0" y="378" width="450" height="32" alpha="230">
+      <Variant mode="AMBIENT" target="alpha" value="0"/>
+      <Text align="CENTER">
+        <Font family="b612_mono" size="18" color="#FF4DFF8F">
+          <Upper>
+            <Template>%s %s %s<Parameter
+              expression="[DAY_OF_WEEK_S]"/><Parameter
+              expression="[DAY_Z]"/><Parameter
+              expression="[MONTH_S]"/></Template>
+          </Upper>
+        </Font>
+      </Text>
+    </PartText>
+
+    <PartText x="0" y="378" width="450" height="32" alpha="0">
+      <Variant mode="AMBIENT" target="alpha" value="255"/>
+      <Text align="CENTER">
+        <Font family="b612_mono" size="18" color="#FF1E7A45">
+          <Upper>
+            <Template>%s %s %s<Parameter
+              expression="[DAY_OF_WEEK_S]"/><Parameter
+              expression="[DAY_Z]"/><Parameter
+              expression="[MONTH_S]"/></Template>
+          </Upper>
+        </Font>
+      </Text>
+    </PartText>
+
+  </Scene>
+</WatchFace>
