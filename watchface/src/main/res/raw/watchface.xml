@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    VIPER HUD — Watch Face Format (WFF v1, Wear OS 4+)
+    VIPER HUD — Watch Face Format (WFF v2, Wear OS 5+)
 
     An F-16 style heads-up display. Phosphor green on pure black, with a
     flight path marker, a pitch ladder that tilts with the wrist, and a
@@ -9,6 +9,9 @@
     Ground collision warning: below 15% battery the ladder declutters and
     a blinking amber PULL UP cue takes over, the same way a GCAS warning
     clears the HUD in the real aircraft.
+
+    Format version 2 is required by the [WEATHER.*] sources feeding the
+    TEMP box; everything else here would run on v1.
 
     Virtual canvas is 450x450. All coordinates below are in that space.
 
@@ -152,7 +155,7 @@
       <PartText x="28" y="176" width="98" height="24" alpha="190">
         <Text align="START">
           <Font family="b612_mono" size="13" color="#FF4DFF8F">
-            <Template>%s<Parameter expression="label_step"/></Template>
+            <Template>%s<Parameter expression="label_temp"/></Template>
           </Font>
         </Text>
       </PartText>
@@ -164,13 +167,35 @@
         </Text>
       </PartText>
 
-      <PartText x="34" y="209" width="86" height="32">
-        <Text align="END" ellipsis="TRUE">
-          <Font family="b612_mono" size="25" color="#FF4DFF8F">
-            <Template>%s<Parameter expression="[STEP_COUNT] != null ? [STEP_COUNT] : &quot;--&quot;"/></Template>
-          </Font>
-        </Text>
-      </PartText>
+      <!-- Outside temperature. Weather needs the watch to know where it is,
+           and it takes that from the paired phone or the network, never from
+           GPS. Until the first reading lands, the box falls back to the
+           placeholder in strings.xml. -->
+      <Condition>
+        <Expressions>
+          <Expression name="weatherReady">[WEATHER.IS_AVAILABLE]</Expression>
+        </Expressions>
+        <Compare expression="weatherReady">
+          <PartText x="34" y="209" width="86" height="32">
+            <Text align="END" ellipsis="TRUE">
+              <Font family="b612_mono" size="25" color="#FF4DFF8F">
+                <Template><![CDATA[%s°%s]]><Parameter
+                  expression="[WEATHER.TEMPERATURE]"/><Parameter
+                  expression="[WEATHER.TEMPERATURE_UNIT] == 1 ? &quot;C&quot; : &quot;F&quot;"/></Template>
+              </Font>
+            </Text>
+          </PartText>
+        </Compare>
+        <Default>
+          <PartText x="34" y="209" width="86" height="32">
+            <Text align="END">
+              <Font family="b612_mono" size="25" color="#FF4DFF8F" >
+                <Template>%s<Parameter expression="value_unavailable"/></Template>
+              </Font>
+            </Text>
+          </PartText>
+        </Default>
+      </Condition>
       <PartText x="330" y="209" width="86" height="32">
         <Text align="START" ellipsis="TRUE">
           <Font family="b612_mono" size="25" color="#FF4DFF8F">

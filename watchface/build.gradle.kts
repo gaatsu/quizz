@@ -8,8 +8,8 @@ android {
 
     defaultConfig {
         applicationId = "com.gaatsu.viperhud"
-        // Wear OS 4 is the first release with Watch Face Format.
-        minSdk = 33
+        // Wear OS 5: the weather data sources need Watch Face Format v2.
+        minSdk = 34
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"

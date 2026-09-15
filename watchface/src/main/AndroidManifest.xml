@@ -3,10 +3,6 @@
 
     <uses-feature android:name="android.hardware.type.watch" />
 
-    <!-- Step count feeds the STEP box. Without it the box shows "--" and
-         everything else keeps working. -->
-    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
-
     <!-- hasCode must be false: a Watch Face Format face ships no code. -->
     <application
         android:label="@string/watch_face_name"
@@ -16,8 +12,11 @@
             android:name="com.google.android.wearable.standalone"
             android:value="true" />
 
+        <!-- Version 2: the TEMP box reads the [WEATHER.*] sources, which
+             arrived with Wear OS 5. Weather needs no permission here — the
+             system supplies it. -->
         <property
             android:name="com.google.wear.watchface.format.version"
-            android:value="1" />
+            android:value="2" />
     </application>
 </manifest>
