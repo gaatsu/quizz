@@ -5,9 +5,22 @@ Fósforo verde sobre preto absoluto, marcador de trajetória no centro, escada d
 arfagem que inclina com o punho, fita de minutos no topo e a temperatura do
 tempo à esquerda. Notificação não lida acende uma antena de datalink embaixo.
 
-Abaixo de **15% de bateria** a escada de arfagem se apaga e entra o aviso de
-colisão com o solo: chevrons de subida e a caixa **PULL UP** piscando em âmbar —
-do mesmo jeito que um GCAS limpa o HUD no avião de verdade.
+Abaixo de **15% de bateria** a escada de arfagem se apaga — do mesmo jeito que
+um GCAS limpa o HUD no avião de verdade — e o vidro vira um mostrador de
+ameaça, escalando um degrau a cada cinco pontos de carga:
+
+| Carga | Aviso | Símbolo | Cor |
+|---|---|---|---|
+| 15% – 11% | `PULL UP` | chevrons de subida | âmbar |
+| 10% – 6% | `LOCKED` | brackets fechando no marcador | âmbar |
+| 5% – 0% | `INCOMING` | breakaway X | vermelho |
+
+Aviso de míssil de verdade não fica no HUD: fica no **RWR**, o receptor de
+alerta radar, onde os termos são *spike* (te iluminaram), *lock* (travaram) e
+*launch* (míssil a caminho). Trazer isso para o vidro é a única licença poética
+aqui — a cor não é. Âmbar é atenção e vermelho é emergência, como no painel
+real. O breakaway X também é símbolo legítimo: é o que o GCAS desenha para
+dizer que o HUD não vale mais.
 
 ![Viper HUD](watchface/src/main/res/drawable/preview.png)
 
@@ -48,23 +61,27 @@ sem instalar em lugar nenhum.
 | Elemento | Fonte de dado |
 |---|---|
 | Hora | `[HOUR_0_23_Z]` ou `[HOUR_1_12_Z]` conforme `[IS_24_HOUR_MODE]`, com `[MINUTE_Z]` |
-| Segundos | `[SECOND_Z]`, pequenos e elevados como um readout de altitude |
 | Data | `[DAY_OF_WEEK_S]` `[DAY_Z]` `[MONTH_S]`, em caixa alta |
 | Fita de minutos | `[MINUTE]` — cinco marcas de um minuto, a atual sob o índice |
 | Caixa TEMP | `[WEATHER.TEMPERATURE]` com a unidade de `[WEATHER.TEMPERATURE_UNIT]`, atrás de um teste de `[WEATHER.IS_AVAILABLE]` |
 | Caixa BATT | `[BATTERY_PERCENT]` |
 | Antena de datalink | `[UNREAD_NOTIFICATION_COUNT]`, só desenhada quando há algo não lido |
 | Escada de arfagem | `[ACCELEROMETER_ANGLE_Y]` e `[ACCELEROMETER_ANGLE_X]` via `Gyro` |
-| Aviso PULL UP | `[BATTERY_PERCENT] <= 15`, piscando com `[SECOND] % 2` |
+| Escalada de aviso | três `Compare` sobre `[BATTERY_PERCENT]`, do mais grave para o menos; `[SECOND] % 2` pisca a legenda |
 
 Nenhuma permissão é pedida na instalação. O clima vem do sistema, não do app.
 
 ### Modo ambiente
 
 Fica só o marcador de trajetória, a hora e a data, em verde apagado — sem fita,
-sem escada, sem caixas, sem segundos. O PULL UP continua aparecendo, mas **parado**:
-em ambiente a tela só redesenha uma vez por minuto, então um pisca de 1 Hz
-congelaria em um estado qualquer.
+sem escada, sem caixas. O aviso continua aparecendo, mas **parado**: em ambiente
+a tela só redesenha uma vez por minuto, então um pisca de 1 Hz congelaria em um
+estado qualquer.
+
+O mostrador não tem segundos, e isso não é só estética: fora do estado de aviso
+nada na tela muda por segundo, então `[SECOND]` só aparece no pisca das legendas
+de alerta. A expectativa é que o sistema caia para um redesenho por minuto no
+uso normal — não medi em hardware.
 
 ## Rodando
 
@@ -88,12 +105,18 @@ adb shell cmd location providers set-test-provider-enabled gps true
 adb shell cmd location providers set-test-provider-location gps --location -25.5163,-54.5854
 ```
 
-**PULL UP.** Para ver o aviso sem esperar a bateria acabar:
+**Avisos.** Para percorrer os três degraus sem esperar a bateria acabar:
 
 ```bash
-adb shell dumpsys battery set level 10
-adb shell dumpsys battery reset   # volta ao normal
+adb shell dumpsys battery set level 13   # PULL UP
+adb shell dumpsys battery set level 8    # LOCKED
+adb shell dumpsys battery set level 3    # INCOMING
+adb shell dumpsys battery reset          # volta ao normal
 ```
+
+As legendas saem de `strings.xml`, então trocar `LOCKED` por `SPIKE` ou
+`INCOMING` por `LAUNCH` — que são os termos literais do RWR — é mudar uma
+palavra.
 
 ## Publicando
 

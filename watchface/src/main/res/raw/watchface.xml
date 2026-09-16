@@ -6,9 +6,9 @@
     flight path marker, a pitch ladder that tilts with the wrist, and a
     minute tape across the top.
 
-    Ground collision warning: below 15% battery the ladder declutters and
-    a blinking amber PULL UP cue takes over, the same way a GCAS warning
-    clears the HUD in the real aircraft.
+    Below 15% battery the ladder declutters and the glass turns into a
+    threat display, escalating in three steps as the charge drops:
+    PULL UP, then LOCKED, then INCOMING. See the Condition further down.
 
     Format version 4 buys three things: the [WEATHER.*] sources behind the
     TEMP box (v2), PLUS blending so overlapping glows add like real
@@ -211,15 +211,164 @@
          Pitch ladder, or the ground collision warning when the battery
          is down to 15%. Only one of the two is ever on screen.
          ================================================================ -->
+    <!-- ================================================================
+         Battery, as a threat escalating in three steps. The real jet keeps
+         missile warnings on the RWR, not the HUD, and the terms there are
+         SPIKE for being tracked, LOCK for a radar lock and LAUNCH for a
+         missile in the air; borrowing them onto the glass is the one
+         liberty taken here. The colours are not a liberty: amber is
+         caution, red is emergency.
+
+             15% .. 11%   PULL UP    chevrons, amber   (GCAS, terrain)
+             10% ..  6%   LOCKED     calipers, amber   (something has you)
+              5% ..  0%   INCOMING   breakaway X, red  (it is already away)
+
+         Only the first matching Compare renders, so the branches run
+         most severe first.
+         ================================================================ -->
     <Condition>
       <Expressions>
-        <Expression name="batteryLow">15 &gt;= [BATTERY_PERCENT]</Expression>
+        <Expression name="stageIncoming">5 &gt;= [BATTERY_PERCENT]</Expression>
+        <Expression name="stageLocked">10 &gt;= [BATTERY_PERCENT]</Expression>
+        <Expression name="stagePullUp">15 &gt;= [BATTERY_PERCENT]</Expression>
       </Expressions>
 
-      <Compare expression="batteryLow">
+      <Compare expression="stageIncoming">
 
-        <!-- Pull-up chevrons, steady -->
-        <Group name="gcas_chevrons" x="0" y="0" width="450" height="450" alpha="255">
+        <!-- steady part of the cue -->
+        <Group name="incoming_cue" x="0" y="0" width="450" height="450" alpha="255">
+          <Variant mode="AMBIENT" target="alpha" value="90" duration="0.5" interpolation="EASE_OUT"/>
+          <PartDraw x="0" y="0" width="450" height="450">
+            <Line startX="155" startY="140" endX="295" endY="246">
+              <Stroke color="#FFFF4A3D" thickness="4" cap="ROUND"/>
+            </Line>
+            <Line startX="295" startY="140" endX="155" endY="246">
+              <Stroke color="#FFFF4A3D" thickness="4" cap="ROUND"/>
+            </Line>
+          </PartDraw>
+        </Group>
+
+        <!-- caption, one second on and one second off -->
+        <Condition>
+          <Expressions>
+            <Expression name="blinkOn">([SECOND] % 2) == 0</Expression>
+          </Expressions>
+          <Compare expression="blinkOn">
+            <Group name="incoming_blink" x="0" y="0" width="450" height="450" alpha="255">
+              <Variant mode="AMBIENT" target="alpha" value="0" duration="0.5" interpolation="EASE_OUT"/>
+              <PartDraw x="0" y="0" width="450" height="450">
+                <Rectangle x="140" y="252" width="170" height="42">
+                  <Stroke color="#FFFF4A3D" thickness="2.5"/>
+                </Rectangle>
+              </PartDraw>
+              <PartText x="140" y="252" width="170" height="42" blendMode="PLUS">
+                <Text align="CENTER">
+                  <Font family="b612_mono_bold" size="27" color="#FFFF4A3D">
+                    <OutGlow radius="7" color="#4DFF4A3D">
+                      <Template>%s<Parameter expression="warn_incoming"/></Template>
+                    </OutGlow>
+                  </Font>
+                </Text>
+              </PartText>
+            </Group>
+          </Compare>
+        </Condition>
+
+        <!-- ambient redraws once a minute, so there the caption holds steady -->
+        <Group name="incoming_ambient" x="0" y="0" width="450" height="450" alpha="0">
+          <Variant mode="AMBIENT" target="alpha" value="255" duration="0.5" startOffset="0.5" interpolation="EASE_IN"/>
+          <PartDraw x="0" y="0" width="450" height="450">
+            <Rectangle x="140" y="252" width="170" height="42">
+              <Stroke color="#FF7A2118" thickness="2"/>
+            </Rectangle>
+          </PartDraw>
+          <PartText x="140" y="252" width="170" height="42">
+            <Text align="CENTER">
+              <Font family="b612_mono" size="27" color="#FF7A2118">
+                <Template>%s<Parameter expression="warn_incoming"/></Template>
+              </Font>
+            </Text>
+          </PartText>
+        </Group>
+
+      </Compare>
+
+      <Compare expression="stageLocked">
+
+        <!-- steady part of the cue -->
+        <Group name="locked_cue" x="0" y="0" width="450" height="450" alpha="255">
+          <Variant mode="AMBIENT" target="alpha" value="90" duration="0.5" interpolation="EASE_OUT"/>
+          <PartDraw x="0" y="0" width="450" height="450">
+            <Line startX="166" startY="190" endX="166" endY="244">
+              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
+            </Line>
+            <Line startX="166" startY="190" endX="178" endY="190">
+              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
+            </Line>
+            <Line startX="166" startY="244" endX="178" endY="244">
+              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
+            </Line>
+            <Line startX="284" startY="190" endX="284" endY="244">
+              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
+            </Line>
+            <Line startX="284" startY="190" endX="272" endY="190">
+              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
+            </Line>
+            <Line startX="284" startY="244" endX="272" endY="244">
+              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
+            </Line>
+          </PartDraw>
+        </Group>
+
+        <!-- caption, one second on and one second off -->
+        <Condition>
+          <Expressions>
+            <Expression name="blinkOn">([SECOND] % 2) == 0</Expression>
+          </Expressions>
+          <Compare expression="blinkOn">
+            <Group name="locked_blink" x="0" y="0" width="450" height="450" alpha="255">
+              <Variant mode="AMBIENT" target="alpha" value="0" duration="0.5" interpolation="EASE_OUT"/>
+              <PartDraw x="0" y="0" width="450" height="450">
+                <Rectangle x="140" y="252" width="170" height="42">
+                  <Stroke color="#FFFFB03A" thickness="2.5"/>
+                </Rectangle>
+              </PartDraw>
+              <PartText x="140" y="252" width="170" height="42" blendMode="PLUS">
+                <Text align="CENTER">
+                  <Font family="b612_mono_bold" size="27" color="#FFFFB03A">
+                    <OutGlow radius="7" color="#4DFFB03A">
+                      <Template>%s<Parameter expression="warn_locked"/></Template>
+                    </OutGlow>
+                  </Font>
+                </Text>
+              </PartText>
+            </Group>
+          </Compare>
+        </Condition>
+
+        <!-- ambient redraws once a minute, so there the caption holds steady -->
+        <Group name="locked_ambient" x="0" y="0" width="450" height="450" alpha="0">
+          <Variant mode="AMBIENT" target="alpha" value="255" duration="0.5" startOffset="0.5" interpolation="EASE_IN"/>
+          <PartDraw x="0" y="0" width="450" height="450">
+            <Rectangle x="140" y="252" width="170" height="42">
+              <Stroke color="#FF7A5418" thickness="2"/>
+            </Rectangle>
+          </PartDraw>
+          <PartText x="140" y="252" width="170" height="42">
+            <Text align="CENTER">
+              <Font family="b612_mono" size="27" color="#FF7A5418">
+                <Template>%s<Parameter expression="warn_locked"/></Template>
+              </Font>
+            </Text>
+          </PartText>
+        </Group>
+
+      </Compare>
+
+      <Compare expression="stagePullUp">
+
+        <!-- steady part of the cue -->
+        <Group name="pullup_cue" x="0" y="0" width="450" height="450" alpha="255">
           <Variant mode="AMBIENT" target="alpha" value="90" duration="0.5" interpolation="EASE_OUT"/>
           <PartDraw x="0" y="0" width="450" height="450">
             <Line startX="191" startY="142" endX="225" endY="124">
@@ -243,15 +392,13 @@
           </PartDraw>
         </Group>
 
-        <!-- Blinking PULL UP, one second on, one second off.
-             Interactive only: ambient redraws once a minute, so the
-             steady copy below takes over there. -->
+        <!-- caption, one second on and one second off -->
         <Condition>
           <Expressions>
             <Expression name="blinkOn">([SECOND] % 2) == 0</Expression>
           </Expressions>
           <Compare expression="blinkOn">
-            <Group name="pull_up_blink" x="0" y="0" width="450" height="450" alpha="255">
+            <Group name="pullup_blink" x="0" y="0" width="450" height="450" alpha="255">
               <Variant mode="AMBIENT" target="alpha" value="0" duration="0.5" interpolation="EASE_OUT"/>
               <PartDraw x="0" y="0" width="450" height="450">
                 <Rectangle x="140" y="252" width="170" height="42">
@@ -271,8 +418,8 @@
           </Compare>
         </Condition>
 
-        <!-- Steady PULL UP for ambient -->
-        <Group name="pull_up_ambient" x="0" y="0" width="450" height="450" alpha="0">
+        <!-- ambient redraws once a minute, so there the caption holds steady -->
+        <Group name="pullup_ambient" x="0" y="0" width="450" height="450" alpha="0">
           <Variant mode="AMBIENT" target="alpha" value="255" duration="0.5" startOffset="0.5" interpolation="EASE_IN"/>
           <PartDraw x="0" y="0" width="450" height="450">
             <Rectangle x="140" y="252" width="170" height="42">
@@ -446,7 +593,7 @@
          ================================================================ -->
 
     <!-- Interactive: bold, glowing -->
-    <PartText x="0" y="296" width="404" height="80" alpha="255" blendMode="PLUS">
+    <PartText x="0" y="296" width="450" height="80" alpha="255" blendMode="PLUS">
       <Variant mode="AMBIENT" target="alpha" value="0" duration="0.5" interpolation="EASE_OUT"/>
       <Text align="CENTER">
         <Font family="b612_mono_bold" size="63" color="#FF4DFF8F">
@@ -460,23 +607,13 @@
     </PartText>
 
     <!-- Ambient: lighter weight, no glow, dim phosphor -->
-    <PartText x="0" y="296" width="404" height="80" alpha="0">
+    <PartText x="0" y="296" width="450" height="80" alpha="0">
       <Variant mode="AMBIENT" target="alpha" value="255" duration="0.5" startOffset="0.5" interpolation="EASE_IN"/>
       <Text align="CENTER">
         <Font family="b612_mono" size="63" color="#FF1E7A45">
           <Template>%s:%s<Parameter
             expression="[IS_24_HOUR_MODE] ? [HOUR_0_23_Z] : [HOUR_1_12_Z]"/><Parameter
             expression="[MINUTE_Z]"/></Template>
-        </Font>
-      </Text>
-    </PartText>
-
-    <!-- Seconds, set small and high like a HUD altitude readout -->
-    <PartText x="315" y="298" width="64" height="30" alpha="255">
-      <Variant mode="AMBIENT" target="alpha" value="0" duration="0.5" interpolation="EASE_OUT"/>
-      <Text align="START">
-        <Font family="b612_mono" size="23" color="#FF4DFF8F">
-          <Template>%s<Parameter expression="[SECOND_Z]"/></Template>
         </Font>
       </Text>
     </PartText>

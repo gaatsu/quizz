@@ -9,6 +9,8 @@
     <string name="ladder_10">10</string>
     <string name="ladder_20">20</string>
     <string name="warn_pull_up">PULL UP</string>
+    <string name="warn_locked">LOCKED</string>
+    <string name="warn_incoming">INCOMING</string>
 
     <!-- Shown in a readout box when the data has not arrived yet. -->
     <string name="value_unavailable">--</string>
