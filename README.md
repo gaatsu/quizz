@@ -131,15 +131,13 @@ adb shell cmd location providers set-test-provider-location gps --location -25.5
 **Avisos.** Para percorrer os três degraus sem esperar a bateria acabar:
 
 ```bash
-adb shell dumpsys battery set level 13   # PULL UP
-adb shell dumpsys battery set level 8    # LOCKED
-adb shell dumpsys battery set level 3    # INCOMING
+adb shell dumpsys battery set level 13   # NAILS
+adb shell dumpsys battery set level 8    # SPIKE
+adb shell dumpsys battery set level 3    # SINGER
 adb shell dumpsys battery reset          # volta ao normal
 ```
 
-As legendas saem de `strings.xml`, então trocar `LOCKED` por `SPIKE` ou
-`INCOMING` por `LAUNCH` — que são os termos literais do RWR — é mudar uma
-palavra.
+As legendas saem de `strings.xml`, então trocá-las é mudar uma palavra.
 
 ## Publicando
 
