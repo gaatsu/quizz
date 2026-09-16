@@ -12,11 +12,12 @@
             android:name="com.google.android.wearable.standalone"
             android:value="true" />
 
-        <!-- Version 2: the TEMP box reads the [WEATHER.*] sources, which
-             arrived with Wear OS 5. Weather needs no permission here — the
-             system supplies it. -->
+        <!-- Version 4: the TEMP box reads the [WEATHER.*] sources (v2), the
+             glow composites additively (v3), and the ambient transition
+             eases rather than cuts (v4). Weather needs no permission
+             here: the system supplies it. -->
         <property
             android:name="com.google.wear.watchface.format.version"
-            android:value="2" />
+            android:value="4" />
     </application>
 </manifest>
