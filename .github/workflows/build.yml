@@ -1,0 +1,31 @@
+name: APK
+
+# Builds the watch face into an installable APK. The point is to make the
+# jet available without a local Android Studio: grab the artifact from the
+# run and `adb install` it straight onto the watch.
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Build
+        run: ./gradlew :watchface:assembleDebug --no-daemon
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: viper-hud-debug
+          path: watchface/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
