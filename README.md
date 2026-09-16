@@ -11,16 +11,21 @@ ameaça, escalando um degrau a cada cinco pontos de carga:
 
 | Carga | Aviso | Símbolo | Cor |
 |---|---|---|---|
-| 15% – 11% | `PULL UP` | chevrons de subida | âmbar |
-| 10% – 6% | `LOCKED` | brackets fechando no marcador | âmbar |
-| 5% – 0% | `INCOMING` | breakaway X | vermelho |
+| 15% – 11% | `NAILS` | arcos tracejados de varredura | âmbar |
+| 10% – 6% | `SPIKE` | anel de travamento fecha no marcador | âmbar |
+| 5% – 0% | `SINGER` | breakaway X | vermelho |
 
-Aviso de míssil de verdade não fica no HUD: fica no **RWR**, o receptor de
-alerta radar, onde os termos são *spike* (te iluminaram), *lock* (travaram) e
-*launch* (míssil a caminho). Trazer isso para o vidro é a única licença poética
-aqui — a cor não é. Âmbar é atenção e vermelho é emergência, como no painel
-real. O breakaway X também é símbolo legítimo: é o que o GCAS desenha para
-dizer que o HUD não vale mais.
+As três palavras são [códigos de brevidade multisserviço](https://en.wikipedia.org/wiki/Multiservice_tactical_brevity_code)
+de verdade, e contam uma história do começo ao fim: **NAILS** é radar varrendo
+sem ter te achado, **SPIKE** é radar te seguindo, **SINGER** é míssil saindo do
+trilho. O anel do SPIKE também é literal — é assim que o RWR marca uma ameaça
+no momento em que ela entra em track.
+
+Duas licenças poéticas, ditas com todas as letras: nada disso fica no HUD no
+avião real (vive no **RWR**, um mostrador redondo separado), e o breakaway X é
+na verdade símbolo do GCAS, emprestado aqui por ser a coisa mais alta que um
+HUD sabe dizer. A cor não é licença: âmbar é atenção e vermelho é emergência,
+como no painel de verdade.
 
 ![Viper HUD](watchface/src/main/res/drawable/preview.png)
 
@@ -65,11 +70,29 @@ sem instalar em lugar nenhum.
 | Fita de minutos | `[MINUTE]` — cinco marcas de um minuto, a atual sob o índice |
 | Caixa TEMP | `[WEATHER.TEMPERATURE]` com a unidade de `[WEATHER.TEMPERATURE_UNIT]`, atrás de um teste de `[WEATHER.IS_AVAILABLE]` |
 | Caixa BATT | `[BATTERY_PERCENT]` |
+| Escala de altitude | fita com riscos à direita; o cursor desliza com `[BATTERY_PERCENT]` |
+| Gun cross | fixo, sem dado: marca para onde o nariz aponta |
 | Antena de datalink | `[UNREAD_NOTIFICATION_COUNT]`, só desenhada quando há algo não lido |
 | Escada de arfagem | `[ACCELEROMETER_ANGLE_Y]` e `[ACCELEROMETER_ANGLE_X]` via `Gyro` |
 | Escalada de aviso | três `Compare` sobre `[BATTERY_PERCENT]`, do mais grave para o menos; `[SECOND] % 2` pisca a legenda |
 
 Nenhuma permissão é pedida na instalação. O clima vem do sistema, não do app.
+
+### Sobre a simbologia
+
+O HUD do F-16 mostra velocidade e altitude em duas apresentações que o piloto
+escolhe: *scales*, a fita vertical com riscos, e *counter*, o número numa
+caixa. As caixas TEMP e BATT são a segunda; a fita à direita é a primeira,
+e o cursor dela anda com a carga, porque de tudo que está na tela a bateria é
+o único dado que cai num 0–100 honesto. Temperatura não tem escala natural, e
+um cursor sobre um intervalo inventado seria enfeite fingindo ser dado — por
+isso a esquerda ficou só na caixa.
+
+A **escala de inclinação** do manual foi desenhada, montada e cortada: num
+mostrador de 450 px os riscos dela embolam com os degraus tracejados de -10 e
+-20 da escada de arfagem, e ela é redundante, já que a escada inclinando é a
+própria indicação de rolamento. No avião o vidro é grande o bastante para as
+duas coisas coexistirem; no pulso, não.
 
 ### Modo ambiente
 

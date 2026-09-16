@@ -8,7 +8,7 @@
 
     Below 15% battery the ladder declutters and the glass turns into a
     threat display, escalating in three steps as the charge drops:
-    PULL UP, then LOCKED, then INCOMING. See the Condition further down.
+    NAILS, then SPIKE, then SINGER. See the Condition further down.
 
     Format version 4 buys three things: the [WEATHER.*] sources behind the
     TEMP box (v2), PLUS blending so overlapping glows add like real
@@ -144,12 +144,73 @@
         </Text>
       </PartText>
 
-      <!-- Data boxes: steps on the left, battery on the right -->
+
+      <!-- Altitude scale. On the real glass this is the right-hand tape, in
+           hundreds of feet. Here the tape is the charge and the caret rides
+           it: of everything on screen it is the one reading that maps onto
+           0..100 honestly. Rectangle y is transformable, so the caret tracks
+           the real value instead of sitting still for decoration. -->
+      <PartDraw x="0" y="0" width="450" height="450">
+        <Line startX="430" startY="168" endX="430" endY="282">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+        <Line startX="430" startY="168.0" endX="420" endY="168.0">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+        <Line startX="430" startY="196.5" endX="420" endY="196.5">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+        <Line startX="430" startY="225.0" endX="420" endY="225.0">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+        <Line startX="430" startY="253.5" endX="420" endY="253.5">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+        <Line startX="430" startY="282.0" endX="420" endY="282.0">
+          <Stroke color="#FF4DFF8F" thickness="2"/>
+        </Line>
+        <Line startX="430" startY="182.2" endX="425" endY="182.2">
+          <Stroke color="#FF4DFF8F" thickness="1.5"/>
+        </Line>
+        <Line startX="430" startY="210.8" endX="425" endY="210.8">
+          <Stroke color="#FF4DFF8F" thickness="1.5"/>
+        </Line>
+        <Line startX="430" startY="239.2" endX="425" endY="239.2">
+          <Stroke color="#FF4DFF8F" thickness="1.5"/>
+        </Line>
+        <Line startX="430" startY="267.8" endX="425" endY="267.8">
+          <Stroke color="#FF4DFF8F" thickness="1.5"/>
+        </Line>
+        <Rectangle x="418" y="223" width="14" height="4">
+          <Transform target="y" value="280 - 1.14 * [BATTERY_PERCENT]"/>
+          <Fill color="#FF4DFF8F"/>
+        </Rectangle>
+      </PartDraw>
+
+      <!-- Gun cross. Boresight reference, bolted to the airframe: it marks
+           where the nose points, as against the marker, which marks where
+           the aircraft is actually going. -->
+      <PartDraw x="0" y="0" width="450" height="450" alpha="200">
+        <Line startX="211" startY="168" endX="221" endY="168">
+          <Stroke color="#FF4DFF8F" thickness="2.5"/>
+        </Line>
+        <Line startX="229" startY="168" endX="239" endY="168">
+          <Stroke color="#FF4DFF8F" thickness="2.5"/>
+        </Line>
+        <Line startX="225" startY="154" endX="225" endY="164">
+          <Stroke color="#FF4DFF8F" thickness="2.5"/>
+        </Line>
+        <Line startX="225" startY="172" endX="225" endY="182">
+          <Stroke color="#FF4DFF8F" thickness="2.5"/>
+        </Line>
+      </PartDraw>
+
+      <!-- Data boxes: temperature left, battery right -->
       <PartDraw x="0" y="0" width="450" height="450">
         <Rectangle x="28" y="204" width="98" height="42">
           <Stroke color="#FF4DFF8F" thickness="2"/>
         </Rectangle>
-        <Rectangle x="324" y="204" width="98" height="42">
+        <Rectangle x="324" y="204" width="88" height="42">
           <Stroke color="#FF4DFF8F" thickness="2"/>
         </Rectangle>
       </PartDraw>
@@ -161,7 +222,7 @@
           </Font>
         </Text>
       </PartText>
-      <PartText x="324" y="176" width="98" height="24" alpha="190">
+      <PartText x="324" y="176" width="88" height="24" alpha="190">
         <Text align="END">
           <Font family="b612_mono" size="13" color="#FF4DFF8F">
             <Template>%s<Parameter expression="label_batt"/></Template>
@@ -198,7 +259,7 @@
           </PartText>
         </Default>
       </Condition>
-      <PartText x="330" y="209" width="86" height="32">
+      <PartText x="330" y="209" width="76" height="32">
         <Text align="START" ellipsis="TRUE">
           <Font family="b612_mono" size="25" color="#FF4DFF8F">
             <Template>%d%%<Parameter expression="[BATTERY_PERCENT]"/></Template>
@@ -212,31 +273,34 @@
          is down to 15%. Only one of the two is ever on screen.
          ================================================================ -->
     <!-- ================================================================
-         Battery, as a threat escalating in three steps. The real jet keeps
-         missile warnings on the RWR, not the HUD, and the terms there are
-         SPIKE for being tracked, LOCK for a radar lock and LAUNCH for a
-         missile in the air; borrowing them onto the glass is the one
-         liberty taken here. The colours are not a liberty: amber is
-         caution, red is emergency.
+         Battery as a radar threat, escalating in three steps. These are
+         the real brevity codes, and they tell one story end to end: a
+         radar is sweeping and has not found you, then it is tracking you,
+         then a missile is off the rail.
 
-             15% .. 11%   PULL UP    chevrons, amber   (GCAS, terrain)
-             10% ..  6%   LOCKED     calipers, amber   (something has you)
-              5% ..  0%   INCOMING   breakaway X, red  (it is already away)
+             15% .. 11%   NAILS    dashed sweep arcs, amber
+             10% ..  6%   SPIKE    lock ring closes on the marker, amber
+              5% ..  0%   SINGER   breakaway X, red
 
-         Only the first matching Compare renders, so the branches run
-         most severe first.
+         Two liberties worth naming: this all belongs on the RWR rather
+         than the glass, and the breakaway X is really a GCAS symbol,
+         borrowed here because it is the loudest thing a HUD can say. The
+         colours are not a liberty — amber is caution, red is emergency.
+
+         Only the first matching Compare renders, so the branches run most
+         severe first.
          ================================================================ -->
     <Condition>
       <Expressions>
-        <Expression name="stageIncoming">5 &gt;= [BATTERY_PERCENT]</Expression>
-        <Expression name="stageLocked">10 &gt;= [BATTERY_PERCENT]</Expression>
-        <Expression name="stagePullUp">15 &gt;= [BATTERY_PERCENT]</Expression>
+        <Expression name="stageSinger">5 &gt;= [BATTERY_PERCENT]</Expression>
+        <Expression name="stageSpike">10 &gt;= [BATTERY_PERCENT]</Expression>
+        <Expression name="stageNails">15 &gt;= [BATTERY_PERCENT]</Expression>
       </Expressions>
 
-      <Compare expression="stageIncoming">
+      <Compare expression="stageSinger">
 
         <!-- steady part of the cue -->
-        <Group name="incoming_cue" x="0" y="0" width="450" height="450" alpha="255">
+        <Group name="singer_cue" x="0" y="0" width="450" height="450" alpha="255">
           <Variant mode="AMBIENT" target="alpha" value="90" duration="0.5" interpolation="EASE_OUT"/>
           <PartDraw x="0" y="0" width="450" height="450">
             <Line startX="155" startY="140" endX="295" endY="246">
@@ -254,18 +318,18 @@
             <Expression name="blinkOn">([SECOND] % 2) == 0</Expression>
           </Expressions>
           <Compare expression="blinkOn">
-            <Group name="incoming_blink" x="0" y="0" width="450" height="450" alpha="255">
+            <Group name="singer_blink" x="0" y="0" width="450" height="450" alpha="255">
               <Variant mode="AMBIENT" target="alpha" value="0" duration="0.5" interpolation="EASE_OUT"/>
               <PartDraw x="0" y="0" width="450" height="450">
-                <Rectangle x="140" y="252" width="170" height="42">
+                <Rectangle x="140" y="262" width="170" height="42">
                   <Stroke color="#FFFF4A3D" thickness="2.5"/>
                 </Rectangle>
               </PartDraw>
-              <PartText x="140" y="252" width="170" height="42" blendMode="PLUS">
+              <PartText x="140" y="262" width="170" height="42" blendMode="PLUS">
                 <Text align="CENTER">
                   <Font family="b612_mono_bold" size="27" color="#FFFF4A3D">
                     <OutGlow radius="7" color="#4DFF4A3D">
-                      <Template>%s<Parameter expression="warn_incoming"/></Template>
+                      <Template>%s<Parameter expression="warn_singer"/></Template>
                     </OutGlow>
                   </Font>
                 </Text>
@@ -275,17 +339,17 @@
         </Condition>
 
         <!-- ambient redraws once a minute, so there the caption holds steady -->
-        <Group name="incoming_ambient" x="0" y="0" width="450" height="450" alpha="0">
+        <Group name="singer_ambient" x="0" y="0" width="450" height="450" alpha="0">
           <Variant mode="AMBIENT" target="alpha" value="255" duration="0.5" startOffset="0.5" interpolation="EASE_IN"/>
           <PartDraw x="0" y="0" width="450" height="450">
-            <Rectangle x="140" y="252" width="170" height="42">
+            <Rectangle x="140" y="262" width="170" height="42">
               <Stroke color="#FF7A2118" thickness="2"/>
             </Rectangle>
           </PartDraw>
-          <PartText x="140" y="252" width="170" height="42">
+          <PartText x="140" y="262" width="170" height="42">
             <Text align="CENTER">
               <Font family="b612_mono" size="27" color="#FF7A2118">
-                <Template>%s<Parameter expression="warn_incoming"/></Template>
+                <Template>%s<Parameter expression="warn_singer"/></Template>
               </Font>
             </Text>
           </PartText>
@@ -293,30 +357,15 @@
 
       </Compare>
 
-      <Compare expression="stageLocked">
+      <Compare expression="stageSpike">
 
         <!-- steady part of the cue -->
-        <Group name="locked_cue" x="0" y="0" width="450" height="450" alpha="255">
+        <Group name="spike_cue" x="0" y="0" width="450" height="450" alpha="255">
           <Variant mode="AMBIENT" target="alpha" value="90" duration="0.5" interpolation="EASE_OUT"/>
           <PartDraw x="0" y="0" width="450" height="450">
-            <Line startX="166" startY="190" endX="166" endY="244">
-              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
-            </Line>
-            <Line startX="166" startY="190" endX="178" endY="190">
-              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
-            </Line>
-            <Line startX="166" startY="244" endX="178" endY="244">
-              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
-            </Line>
-            <Line startX="284" startY="190" endX="284" endY="244">
-              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
-            </Line>
-            <Line startX="284" startY="190" endX="272" endY="190">
-              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
-            </Line>
-            <Line startX="284" startY="244" endX="272" endY="244">
-              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
-            </Line>
+            <Ellipse x="193" y="193" width="64" height="64">
+              <Stroke color="#FFFFB03A" thickness="3"/>
+            </Ellipse>
           </PartDraw>
         </Group>
 
@@ -326,18 +375,18 @@
             <Expression name="blinkOn">([SECOND] % 2) == 0</Expression>
           </Expressions>
           <Compare expression="blinkOn">
-            <Group name="locked_blink" x="0" y="0" width="450" height="450" alpha="255">
+            <Group name="spike_blink" x="0" y="0" width="450" height="450" alpha="255">
               <Variant mode="AMBIENT" target="alpha" value="0" duration="0.5" interpolation="EASE_OUT"/>
               <PartDraw x="0" y="0" width="450" height="450">
-                <Rectangle x="140" y="252" width="170" height="42">
+                <Rectangle x="140" y="262" width="170" height="42">
                   <Stroke color="#FFFFB03A" thickness="2.5"/>
                 </Rectangle>
               </PartDraw>
-              <PartText x="140" y="252" width="170" height="42" blendMode="PLUS">
+              <PartText x="140" y="262" width="170" height="42" blendMode="PLUS">
                 <Text align="CENTER">
                   <Font family="b612_mono_bold" size="27" color="#FFFFB03A">
                     <OutGlow radius="7" color="#4DFFB03A">
-                      <Template>%s<Parameter expression="warn_locked"/></Template>
+                      <Template>%s<Parameter expression="warn_spike"/></Template>
                     </OutGlow>
                   </Font>
                 </Text>
@@ -347,17 +396,17 @@
         </Condition>
 
         <!-- ambient redraws once a minute, so there the caption holds steady -->
-        <Group name="locked_ambient" x="0" y="0" width="450" height="450" alpha="0">
+        <Group name="spike_ambient" x="0" y="0" width="450" height="450" alpha="0">
           <Variant mode="AMBIENT" target="alpha" value="255" duration="0.5" startOffset="0.5" interpolation="EASE_IN"/>
           <PartDraw x="0" y="0" width="450" height="450">
-            <Rectangle x="140" y="252" width="170" height="42">
+            <Rectangle x="140" y="262" width="170" height="42">
               <Stroke color="#FF7A5418" thickness="2"/>
             </Rectangle>
           </PartDraw>
-          <PartText x="140" y="252" width="170" height="42">
+          <PartText x="140" y="262" width="170" height="42">
             <Text align="CENTER">
               <Font family="b612_mono" size="27" color="#FF7A5418">
-                <Template>%s<Parameter expression="warn_locked"/></Template>
+                <Template>%s<Parameter expression="warn_spike"/></Template>
               </Font>
             </Text>
           </PartText>
@@ -365,30 +414,20 @@
 
       </Compare>
 
-      <Compare expression="stagePullUp">
+      <Compare expression="stageNails">
 
         <!-- steady part of the cue -->
-        <Group name="pullup_cue" x="0" y="0" width="450" height="450" alpha="255">
+        <Group name="nails_cue" x="0" y="0" width="450" height="450" alpha="255">
           <Variant mode="AMBIENT" target="alpha" value="90" duration="0.5" interpolation="EASE_OUT"/>
           <PartDraw x="0" y="0" width="450" height="450">
-            <Line startX="191" startY="142" endX="225" endY="124">
-              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
-            </Line>
-            <Line startX="225" startY="124" endX="259" endY="142">
-              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
-            </Line>
-            <Line startX="191" startY="168" endX="225" endY="150">
-              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
-            </Line>
-            <Line startX="225" startY="150" endX="259" endY="168">
-              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
-            </Line>
-            <Line startX="191" startY="194" endX="225" endY="176">
-              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
-            </Line>
-            <Line startX="225" startY="176" endX="259" endY="194">
-              <Stroke color="#FFFFB03A" thickness="3" cap="ROUND"/>
-            </Line>
+            <Arc centerX="225" centerY="225" width="144" height="144"
+                 startAngle="-52" endAngle="52">
+              <Stroke color="#FFFFB03A" thickness="3" dashIntervals="10 8"/>
+            </Arc>
+            <Arc centerX="225" centerY="225" width="112" height="112"
+                 startAngle="-44" endAngle="44">
+              <Stroke color="#FFFFB03A" thickness="3" dashIntervals="10 8"/>
+            </Arc>
           </PartDraw>
         </Group>
 
@@ -398,18 +437,18 @@
             <Expression name="blinkOn">([SECOND] % 2) == 0</Expression>
           </Expressions>
           <Compare expression="blinkOn">
-            <Group name="pullup_blink" x="0" y="0" width="450" height="450" alpha="255">
+            <Group name="nails_blink" x="0" y="0" width="450" height="450" alpha="255">
               <Variant mode="AMBIENT" target="alpha" value="0" duration="0.5" interpolation="EASE_OUT"/>
               <PartDraw x="0" y="0" width="450" height="450">
-                <Rectangle x="140" y="252" width="170" height="42">
+                <Rectangle x="140" y="262" width="170" height="42">
                   <Stroke color="#FFFFB03A" thickness="2.5"/>
                 </Rectangle>
               </PartDraw>
-              <PartText x="140" y="252" width="170" height="42" blendMode="PLUS">
+              <PartText x="140" y="262" width="170" height="42" blendMode="PLUS">
                 <Text align="CENTER">
                   <Font family="b612_mono_bold" size="27" color="#FFFFB03A">
                     <OutGlow radius="7" color="#4DFFB03A">
-                      <Template>%s<Parameter expression="warn_pull_up"/></Template>
+                      <Template>%s<Parameter expression="warn_nails"/></Template>
                     </OutGlow>
                   </Font>
                 </Text>
@@ -419,23 +458,24 @@
         </Condition>
 
         <!-- ambient redraws once a minute, so there the caption holds steady -->
-        <Group name="pullup_ambient" x="0" y="0" width="450" height="450" alpha="0">
+        <Group name="nails_ambient" x="0" y="0" width="450" height="450" alpha="0">
           <Variant mode="AMBIENT" target="alpha" value="255" duration="0.5" startOffset="0.5" interpolation="EASE_IN"/>
           <PartDraw x="0" y="0" width="450" height="450">
-            <Rectangle x="140" y="252" width="170" height="42">
+            <Rectangle x="140" y="262" width="170" height="42">
               <Stroke color="#FF7A5418" thickness="2"/>
             </Rectangle>
           </PartDraw>
-          <PartText x="140" y="252" width="170" height="42">
+          <PartText x="140" y="262" width="170" height="42">
             <Text align="CENTER">
               <Font family="b612_mono" size="27" color="#FF7A5418">
-                <Template>%s<Parameter expression="warn_pull_up"/></Template>
+                <Template>%s<Parameter expression="warn_nails"/></Template>
               </Font>
             </Text>
           </PartText>
         </Group>
 
       </Compare>
+
 
       <Default>
         <!-- Pitch ladder and horizon. Gyro tilts the whole thing with the
@@ -545,6 +585,8 @@
             </Text>
           </PartText>
         </Group>
+
+
       </Default>
     </Condition>
 
