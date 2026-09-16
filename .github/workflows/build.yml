@@ -19,8 +19,9 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - uses: android-actions/setup-android@v3
-
+      # No setup-android step on purpose: the runner image already ships the
+      # SDK with licences accepted, and that action still asks sdkmanager for
+      # the long-removed "tools" package, which fails the job outright.
       - name: Build
         run: ./gradlew :watchface:assembleDebug --no-daemon
 
